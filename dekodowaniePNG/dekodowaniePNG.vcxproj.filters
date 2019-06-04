@@ -18,6 +18,9 @@
     <ClInclude Include="pch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="jpg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -26,5 +29,18 @@
     <ClCompile Include="dekodowaniePNG.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="zdjecie.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="dell100x100.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="plik.txt" />
+    <Text Include="zdjecieWAscii.txt" />
+    <Text Include="plikRSA.txt" />
   </ItemGroup>
 </Project>
