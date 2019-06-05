@@ -8,19 +8,14 @@
 #include "jpg.h"
 using namespace std;
 
-int toInt(string bitString)
-{
-	int tempInt;
+int toInt(string bitString){
 	int num = 0;
 	for (char c : bitString)
-		num = (num << 1) |  // Shift the current set of bits to the left one bit
-		(c - '0');
-
+		num = (num << 1) | (c - '0');
 	return num;
 }
 
-unsigned char hexval(unsigned char c)
-{
+unsigned char hexval(unsigned char c){
 	if ('0' <= c && c <= '9')
 		return c - '0';
 	else if ('a' <= c && c <= 'f')
@@ -51,7 +46,6 @@ void odczytZdjecia(string plikOdczytywany, string plikZapis) {
 	int i = 1;
 	while (f.get(c))
 	{
-		cout << c<<" ";
 		bitset<8>  bity(c);
 		int tmp = toInt(bity.to_string());
 		zapis << hex << tmp << " ";

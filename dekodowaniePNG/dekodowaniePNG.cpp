@@ -1,6 +1,3 @@
-// dekodowaniePNG.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
-
 #include "pch.h"
 #include <iostream>
 #include <fstream>
@@ -12,6 +9,8 @@
 #include <cstring>
 #include <vector>
 #include <cmath>
+#include <conio.h>
+#include <math.h>
 #include "jpg.h"
 using namespace std;
 
@@ -28,8 +27,7 @@ bool czyPNG(vector<string> znak) {
 	else return false;
 }
 
-string char_to_str(char ch)
-{
+string charToStr(char ch){
 	bitset<8> temp(ch);
 	return temp.to_string();
 }
@@ -125,63 +123,55 @@ void dekodowanie(vector<string> znak) {
 	cout << "ilosc bitow znaczacych dla kanalow alfa: " << val15 << endl;
 }
 
-int nwd(int a, int b)
-{
-	int t;
-
-	while (b != 0)
-	{
-		t = b;
-		b = a % b;
-		a = t;
-	};
-	return a;
+int NWD(int x, int y){
+	do{
+		if (x > y) {
+			x = x - y;
+		}
+		else {
+			y = y - x;
+		}
+	} while (x != y);
+	return x;
 }
 
-// Funkcja obliczania odwrotnoœci modulo n
-//----------------------------------------
-int odwr_mod(int a, int n)
-{
-	int a0, n0, p0, p1, q, r, t;
+//int kluczPrywatny(int a, int n){
+//	int a0, n0, p0, p1, q, r, t;
+//
+//	p0 = 0; p1 = 1; a0 = a; n0 = n;
+//	q = n0 / a0;
+//	r = n0 % a0;
+//	while (r > 0){
+//		t = p0 - q * p1;
+//		if (t >= 0)
+//			t = t % n;
+//		else
+//			t = n - ((-t) % n);
+//		p0 = p1; p1 = t;
+//		n0 = a0; a0 = r;
+//		q = n0 / a0;
+//		r = n0 % a0;
+//	}
+//	return p1;
+//}
 
-	p0 = 0; p1 = 1; a0 = a; n0 = n;
-	q = n0 / a0;
-	r = n0 % a0;
-	while (r > 0)
-	{
-		t = p0 - q * p1;
-		if (t >= 0)
-			t = t % n;
-		else
-			t = n - ((-t) % n);
-		p0 = p1; p1 = t;
-		n0 = a0; a0 = r;
-		q = n0 / a0;
-		r = n0 % a0;
-	}
-	return p1;
+int kluczPrywatny(int e, int euler) {
+	int k = 1;
+	do {
+		k = k + euler;
+	} while (k % e == 0);
+
+	return(k / e);
 }
 
-// Procedura generowania kluczy RSA
-//---------------------------------
-vector<int> klucze_RSA()
+vector<int> genKluczyRSA()
 {
-	const int tp[10] = { 11,13,17,19,23,29,31,37,41,43 };
-	int p, q, phi, n, e, d;
+	int p=11, q=23, euler, n, e=3;
 
-	do
-	{
-		p = 11;
-		q = 23;
-	} while (p == q);
-
-	phi = (p - 1) * (q - 1);
+	euler = (p - 1) * (q - 1);
 	n = p * q;
-
-	for (e = 3; nwd(e, phi) != 1; e += 2);
-	d = odwr_mod(e, phi);
-
-	//int tab[] = { e,n,d };
+	while (NWD(e, euler) != 1) e += 2;
+	int d = kluczPrywatny(e,euler);
 	vector<int> tab;
 	tab.push_back(e);
 	tab.push_back(n);
@@ -189,22 +179,20 @@ vector<int> klucze_RSA()
 	return tab;
 }
 
-int kodowanie_RSA(int e, int n,int t)
-{
+int kodowanieRSA(int e, int n,int t){
 	int wynik=1,i;
-	for (i = e; i > 0; i /= 2)
-	{
-		if (i % 2) wynik = (wynik * t) % n;
-		t = (t * t) % n; 
+	for (int i = 0; i < e; i++) {
+		wynik = wynik * t;
+		wynik = wynik % n;
 	}
 	return wynik;
 }
 
-void zapisZnakuDoPliku(string znak) {
-	ofstream zapis("plikRSA.txt", ios::app);
+void zapisZnakuDoPliku(string znak,string nazwa, string obraz) {
+	ofstream zapis(nazwa, ios::app);
 	zapis << znak << " ";
 	zapis.close();
-	ofstream zapis2("plik.png", ios::binary | ios::app);
+	ofstream zapis2(obraz, ios::binary | ios::app);
 	stringstream str2;
 	string ascii;
 		if (znak.size() == 1) { ascii = hexToAscii("0" + znak); }
@@ -214,26 +202,20 @@ void zapisZnakuDoPliku(string znak) {
 	zapis2.close();
 }
 
-unsigned long hex2dec(string hex)
-{
+unsigned long hex2dec(string hex){
 	unsigned long result = 0;
 	for (int i = 0; i < hex.length(); i++) {
 		if (hex[i] >= 48 && hex[i] <= 57)
-		{
 			result += (hex[i] - 48)*pow(16, hex.length() - i - 1);
-		}
-		else if (hex[i] >= 65 && hex[i] <= 70) {
+		else if (hex[i] >= 65 && hex[i] <= 70) 
 			result += (hex[i] - 55)*pow(16, hex.length() - i - 1);
-		}
-		else if (hex[i] >= 97 && hex[i] <= 102) {
+		else if (hex[i] >= 97 && hex[i] <= 102) 
 			result += (hex[i] - 87)*pow(16, hex.length() - i - 1);
-		}
 	}
 	return result;
 }
 
 string intToHexString(int intValue) {
-
 	string hexStr;
 	std::stringstream sstream;
 	sstream << std::hex << (int)intValue;
@@ -246,22 +228,27 @@ string intToHexString(int intValue) {
 void szukajIDAT(vector<string> znak) {
 	//49 44 41 54
 	int kod;
-	vector<int> tab = klucze_RSA();
+	vector<int> tab = genKluczyRSA();
 	for (int i = 0; i < 8; i++) {
-		zapisZnakuDoPliku(znak[i]);
+		zapisZnakuDoPliku(znak[i], "plikRSA.txt", "plik.png");
+		zapisZnakuDoPliku(znak[i], "plikodkodowany.txt", "plikodkodowany.png");
 	}
 	for (int i = 8; i < znak.size(); ++i) {
 		if (znak[i] == "49") {
-			zapisZnakuDoPliku(znak[i]);
+			zapisZnakuDoPliku(znak[i], "plikRSA.txt", "plik.png");
+			zapisZnakuDoPliku(znak[i], "plikodkodowany.txt", "plikodkodowany.png");
 			if (znak[i+1] == "44") {
 				++i;
-				zapisZnakuDoPliku(znak[i]);
+				zapisZnakuDoPliku(znak[i], "plikRSA.txt", "plik.png");
+				zapisZnakuDoPliku(znak[i], "plikodkodowany.txt", "plikodkodowany.png");
 				if (znak[i+1] == "41") {
 					++i;
-					zapisZnakuDoPliku(znak[i]);
+					zapisZnakuDoPliku(znak[i], "plikRSA.txt", "plik.png");
+					zapisZnakuDoPliku(znak[i], "plikodkodowany.txt", "plikodkodowany.png");
 					if (znak[i+1] == "54") {
 						++i;
-						zapisZnakuDoPliku(znak[i]);
+						zapisZnakuDoPliku(znak[i], "plikRSA.txt", "plik.png");
+						zapisZnakuDoPliku(znak[i], "plikodkodowany.txt", "plikodkodowany.png");
 						stringstream strpom;
 						for (int j = 4; j >= 1; j--) strpom << znak[i -3 - j];
 						int val12;
@@ -269,26 +256,28 @@ void szukajIDAT(vector<string> znak) {
 						int l;
 						for (l = 0; l < val12; l++) {
 							int val15 = hex2dec(znak[i+l]);
-							//cout << " val15: " << val15;
-							kod = kodowanie_RSA(tab[0], tab[1], val15);
-							//cout << " kod: " << kod<<endl;
-							
-							zapisZnakuDoPliku(intToHexString(kod));
+							kod = kodowanieRSA(tab[0], tab[1], val15);
+							int odkodowany = kodowanieRSA(tab[2],tab[1],kod);
+							zapisZnakuDoPliku(intToHexString(kod), "plikRSA.txt", "plik.png");
+							zapisZnakuDoPliku(intToHexString(odkodowany), "plikodkodowany.txt", "plikodkodowany.png");
 						}
 						i = i+l;
 					}
 				}
 			}
 		}
-		else zapisZnakuDoPliku(znak[i]);
+		else {
+			zapisZnakuDoPliku(znak[i], "plikRSA.txt", "plik.png");
+			zapisZnakuDoPliku(znak[i], "plikodkodowany.txt", "plikodkodowany.png");
+		}
 	}
-	//cout << "tab : " << tab[0] << " " << tab[1] << endl;
 }
-int main()
-{
+int main(){
 	remove("plik.txt");
 	remove("plikRSA.txt");
 	remove("plik.png");
+	remove("plikodkodowany.txt");
+	remove("plikodkodowany.png");
 	vector<string> slowa;
 	odczytZdjecia("prostokat.png", "plik.txt");
 	slowa = odczytZPliku("plik.txt");
@@ -301,8 +290,6 @@ int main()
 	else
 		cout<<"to nie jest plik PNG!" << endl;
 	szukajIDAT(slowa);
-	cout<<"wynik: "<<kodowanie_RSA(7, 143, 123)<<endl;
-	cout << "wynik: " << kodowanie_RSA(3, 253, 86) << endl;
 }
 
 
